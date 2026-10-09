@@ -1,0 +1,3 @@
+{
+  "installCommand": "pip install -r requirements.txt && PLAYWRIGHT_BROWSERS_PATH=./pw-browsers patchright install chromium"
+}
