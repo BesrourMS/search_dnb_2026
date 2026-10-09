@@ -111,3 +111,33 @@ def health():
         result["import_error"] = f"{type(exc).__name__}: {exc}"
 
     return result
+
+
+@app.get("/api/browser-test")
+async def browser_test():
+    import asyncio
+    import traceback
+
+    def test_browser():
+        from scrapling.fetchers import StealthyFetcher
+
+        page = StealthyFetcher.fetch(
+            "https://example.com",
+            headless=True,
+            timeout=20000,
+            wait=1000,
+        )
+
+        return {
+            "status": getattr(page, "status", None),
+            "title": page.css("title::text").get(),
+        }
+
+    try:
+        return await asyncio.to_thread(test_browser)
+    except Exception as exc:
+        traceback.print_exc()
+        return {
+            "error": type(exc).__name__,
+            "detail": str(exc),
+        }
