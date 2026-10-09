@@ -1,6 +1,8 @@
 import asyncio
 import json
 import re
+import importlib.util
+import sys
 from html import unescape
 from urllib.parse import urlencode
 
@@ -90,3 +92,22 @@ async def search(
             status_code=502,
             detail=f"Company search failed: {type(exc).__name__}",
         ) from exc
+
+@app.get("/api/health")
+def health():
+    result = {
+        "status": "ok",
+        "python_version": sys.version,
+        "scrapling_installed": (
+            importlib.util.find_spec("scrapling") is not None
+        ),
+    }
+
+    try:
+        from scrapling.fetchers import StealthyFetcher
+        result["scrapling_fetcher_import"] = "ok"
+    except Exception as exc:
+        result["scrapling_fetcher_import"] = "failed"
+        result["import_error"] = f"{type(exc).__name__}: {exc}"
+
+    return result
